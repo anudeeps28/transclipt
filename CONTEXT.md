@@ -11,7 +11,12 @@ Read by Claude Code agents before grilling, architecture proposals, or refactor 
 
 | Term | Definition |
 |---|---|
-| _Term_ | _Definition — what it means in this specific codebase, not the general concept_ |
+| transclipt | CLI tool and Python package that transcribes video/audio URLs to text |
+| segment | A contiguous block of transcribed speech with start/end timestamps |
+| yt-dlp | External tool that downloads audio from 1000+ video platforms |
+| faster-whisper | CTranslate2-accelerated Whisper model for speech-to-text transcription |
+| spotdl | Optional external tool for downloading Spotify tracks (installed via extras) |
+| VAD | Voice Activity Detection — filters silence before transcription to improve accuracy |
 
 ---
 
@@ -21,7 +26,10 @@ One line per module or service. What it owns and what it explicitly does not.
 
 | Module / Service | Owns | Does NOT own |
 |---|---|---|
-| _Module_ | _Responsibilities_ | _Explicit boundaries_ |
+| transclipt.cli | CLI argument parsing, orchestration of download-transcribe-format pipeline, progress display | Audio download logic, transcription logic, output formatting |
+| transclipt.downloader | Downloading audio from URLs via yt-dlp and spotdl, producing mp3 files | Transcription, formatting, temp directory lifecycle (caller manages) |
+| transclipt.transcriber | Loading Whisper models, transcribing audio files, returning segments with timestamps | Downloading, formatting, file I/O for final output |
+| transclipt.formatter | Converting TranscriptionResult to txt/md/srt/json string formats | File I/O (caller writes to disk) |
 
 ---
 
@@ -29,8 +37,10 @@ One line per module or service. What it owns and what it explicitly does not.
 
 Patterns that apply here but might surprise a reader from another project. The "why" for each lives in `docs/adr/` if it was a hard decision.
 
-- _Convention 1 — description_
-- _Convention 2 — description_
+- Frozen dataclasses for all data transfer objects (DownloadResult, Segment, TranscriptionResult)
+- Typer for CLI with Rich for terminal output
+- Temp directories created by caller, cleaned up in finally blocks
+- Model caching in module-level dict to avoid reloading Whisper models
 
 ---
 

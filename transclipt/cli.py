@@ -12,12 +12,12 @@ import typer
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from riptext.downloader import download_audio
-from riptext.formatter import format_output, get_extension
-from riptext.transcriber import transcribe
+from transclipt.downloader import download_audio
+from transclipt.formatter import format_output, get_extension
+from transclipt.transcriber import transcribe
 
 app = typer.Typer(
-    name="riptext",
+    name="transclipt",
     help="Transcribe any video URL to text. Supports YouTube, Instagram, TikTok, Twitter, Spotify, and 1000+ more.",
     no_args_is_help=True,
 )
@@ -73,7 +73,7 @@ def _process_url(
     output_path: Path | None,
     device: str,
 ) -> None:
-    tmp_dir = Path(tempfile.mkdtemp(prefix="riptext_"))
+    tmp_dir = Path(tempfile.mkdtemp(prefix="transclipt_"))
 
     try:
         with Progress(

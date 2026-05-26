@@ -9,19 +9,20 @@ Running log of decisions, conventions, known fixes, and things to remember. Clau
 > Define your project's coding style here. Agents read this section to follow your patterns.
 > Below is an example — replace with your own conventions.
 
-**Language:** [your language — e.g. TypeScript, Python, Go, C#]
+**Language:** Python 3.10+
 
-**Build command:** [e.g. `npm run build`, `go build ./...`, `dotnet build`]
-**Test command:** [e.g. `npm test`, `pytest`, `go test ./...`]
-**Lint command:** [e.g. `npm run lint`, `ruff check`, `golangci-lint run`]
+**Build command:** `pip install -e .`
+**Test command:** `python -m pytest tests/ -v`
+**Lint command:** `ruff check transclipt/ tests/`
 
 **Naming:**
-- [e.g. camelCase for functions, PascalCase for types]
-- [e.g. test files: `*.test.ts` or `*_test.go`]
+- snake_case for functions/variables, PascalCase for classes, UPPER_SNAKE for constants
+- Test files: `tests/test_*.py`
 
 **Patterns:**
-- [e.g. use async/await, not callbacks]
-- [e.g. error handling: return errors, don't throw]
+- Frozen dataclasses for all data transfer objects
+- Type annotations on all function signatures
+- Immutable data — never mutate, always return new objects
 
 ---
 
@@ -55,21 +56,21 @@ Options:
 > Fill in every command that applies to your project. Leave others as `<!-- not applicable -->`.
 
 **Level 1 — Build + Unit Tests (no external dependencies):**
-- Build: `<!-- your build command (e.g., npm run build, go build ./..., dotnet build) -->`
-- Unit tests: `<!-- your unit test command (e.g., npm test, pytest tests/unit/, go test ./... -short) -->`
+- Build: `pip install -e .`
+- Unit tests: `python -m pytest tests/ -v`
 
 **Level 2 — Integration Tests (may require Docker/emulators):**
-- Setup: `<!-- command to start dependencies (e.g., docker compose up -d, or "not applicable") -->`
-- Integration tests: `<!-- your integration test command (e.g., npm run test:integration, pytest tests/integration/) -->`
-- Cleanup: `<!-- command to stop dependencies (e.g., docker compose down) -->`
+- Setup: not applicable (external services)
+- Integration tests: not applicable
+- Cleanup: not applicable
 
 **Level 3 — Dev Server (for manual testing):**
-- Dev server: `<!-- command to start the app (e.g., npm run dev, go run ./cmd/server/, uvicorn main:app --reload) -->`
-- Dev server URL: `<!-- e.g., http://localhost:3000 -->`
+- Dev server: not applicable (CLI tool)
+- Dev server URL: not applicable
 
 **Test filtering (for verify commands):**
-- Run a specific test class: `<!-- e.g., npm test -- --grep "ClassName", pytest tests/test_file.py -->`
-- Run a specific test: `<!-- e.g., npm test -- --testNamePattern "test name", pytest tests/test_file.py::test_name -->`
+- Run a specific test file: `python -m pytest tests/test_formatter.py -v`
+- Run a specific test: `python -m pytest tests/test_formatter.py::test_name -v`
 
 ---
 

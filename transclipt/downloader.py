@@ -32,7 +32,7 @@ def download_audio(url: str, output_dir: Path | None = None) -> DownloadResult:
 
 
 def _download_ytdlp(url: str, output_dir: Path | None) -> DownloadResult:
-    work_dir = output_dir or Path(tempfile.mkdtemp(prefix="riptext_"))
+    work_dir = output_dir or Path(tempfile.mkdtemp(prefix="transclipt_"))
     output_template = str(work_dir / "%(title)s.%(ext)s")
 
     ydl_opts = {
@@ -69,10 +69,10 @@ def _download_spotify(url: str, output_dir: Path | None) -> DownloadResult:
         import spotdl  # noqa: F401
     except ImportError:
         raise RuntimeError(
-            "Spotify support requires spotdl. Install with: pip install riptext[spotify]"
+            "Spotify support requires spotdl. Install with: pip install transclipt[spotify]"
         )
 
-    work_dir = output_dir or Path(tempfile.mkdtemp(prefix="riptext_spotify_"))
+    work_dir = output_dir or Path(tempfile.mkdtemp(prefix="transclipt_spotify_"))
 
     result = subprocess.run(
         ["spotdl", "download", url, "--output", str(work_dir)],
