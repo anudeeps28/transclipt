@@ -13,7 +13,7 @@ Running log of decisions, conventions, known fixes, and things to remember. Clau
 
 **Build command:** `pip install -e .`
 **Test command:** `python -m pytest tests/ -v`
-**Lint command:** `ruff check riptext/ tests/`
+**Lint command:** `ruff check transclipt/ tests/`
 
 **Naming:**
 - snake_case for functions/variables, PascalCase for classes, UPPER_SNAKE for constants

@@ -1,4 +1,4 @@
-"""Tests for riptext.formatter module."""
+"""Tests for transclipt.formatter module."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from riptext.formatter import (
+from transclipt.formatter import (
     _format_srt_time,
     format_output,
     get_extension,
@@ -15,7 +15,7 @@ from riptext.formatter import (
     to_srt,
     to_text,
 )
-from riptext.transcriber import Segment, TranscriptionResult
+from transclipt.transcriber import Segment, TranscriptionResult
 
 
 @pytest.fixture

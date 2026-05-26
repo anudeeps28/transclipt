@@ -6,7 +6,7 @@ import json
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from riptext.transcriber import TranscriptionResult
+    from transclipt.transcriber import TranscriptionResult
 
 
 def to_text(result: TranscriptionResult) -> str:

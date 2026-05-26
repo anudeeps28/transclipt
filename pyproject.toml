@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "riptext"
+name = "transclipt"
 version = "0.1.0"
 description = "Transcribe any video URL to text. YouTube, Instagram, TikTok, Twitter, Spotify, and 1000+ more."
 readme = "README.md"
@@ -20,4 +20,4 @@ dependencies = [
 spotify = ["spotdl>=4.2.0"]
 
 [project.scripts]
-riptext = "riptext.cli:app"
+transclipt = "transclipt.cli:app"

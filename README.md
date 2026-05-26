@@ -1,4 +1,4 @@
-# riptext
+# transclipt
 
 Transcribe any video URL to text. Supports YouTube, Instagram, TikTok, Twitter/X, Spotify, and 1000+ more sites.
 
@@ -18,8 +18,8 @@ sudo apt install ffmpeg
 ## Install
 
 ```bash
-git clone https://github.com/anudeeps28/riptext.git
-cd riptext
+git clone https://github.com/anudeeps28/transclipt.git
+cd transclipt
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .
@@ -35,22 +35,22 @@ pip install -e ".[spotify]"
 
 ```bash
 # Basic — outputs a .txt file auto-named after the video title
-riptext https://www.youtube.com/watch?v=dQw4w9WgXcQ
+transclipt https://www.youtube.com/watch?v=dQw4w9WgXcQ
 
 # Instagram reel → SRT subtitle file
-riptext https://www.instagram.com/reel/... --format srt
+transclipt https://www.instagram.com/reel/... --format srt
 
 # Markdown output with better model
-riptext <url> --format md --model medium
+transclipt <url> --format md --model medium
 
 # Multiple URLs at once
-riptext <url1> <url2> <url3>
+transclipt <url1> <url2> <url3>
 
 # Force language (useful for non-English content)
-riptext <url> --language hi --model small
+transclipt <url> --language hi --model small
 
 # Specific output file
-riptext <url> --format json --output result.json
+transclipt <url> --format json --output result.json
 ```
 
 ### Options
