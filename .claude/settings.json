@@ -1,0 +1,63 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/Users/anudeepsharma/Programming/AI-email-feed/yt-transcriber/.claude/hooks/safety-check.js\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/Users/anudeepsharma/Programming/AI-email-feed/yt-transcriber/.claude/hooks/catalog-trigger.js\""
+          },
+          {
+            "type": "command",
+            "command": "node \"/Users/anudeepsharma/Programming/AI-email-feed/yt-transcriber/.claude/hooks/drift-check.js\""
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/Users/anudeepsharma/Programming/AI-email-feed/yt-transcriber/.claude/hooks/pre-compact.js\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"SESSION START: Before doing anything else — read tasks/notes.md and tasks/plan.md\""
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/Users/anudeepsharma/Programming/AI-email-feed/yt-transcriber/.claude/hooks/session-log.js\""
+          }
+        ]
+      }
+    ]
+  }
+}
