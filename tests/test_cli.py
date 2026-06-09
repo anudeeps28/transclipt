@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from typer.testing import CliRunner
@@ -15,7 +14,7 @@ from transclipt.transcriber import Segment, TranscriptionResult
 runner = CliRunner()
 
 
-def _fake_download(url: str, output_dir: Path | None = None) -> DownloadResult:
+def _fake_download(url: str, output_dir: Path | None = None, cookies_file: Path | None = None) -> DownloadResult:
     audio_path = (output_dir or Path("/tmp")) / "test.mp3"
     audio_path.parent.mkdir(parents=True, exist_ok=True)
     audio_path.write_text("fake")
@@ -155,3 +154,30 @@ class TestCli:
         ])
         assert result.exit_code == 1
         assert "Error processing" in result.output
+
+    def test_cookies_file_not_found_errors(self, tmp_path: Path) -> None:
+        result = runner.invoke(app, [
+            "https://www.youtube.com/watch?v=abc",
+            "--cookies", str(tmp_path / "nonexistent.txt"),
+        ])
+        assert result.exit_code == 1
+        assert "Cookies file not found" in result.output
+
+    @patch("transclipt.cli.transcribe", side_effect=lambda **kw: _fake_transcribe(**kw))
+    @patch("transclipt.cli.download_audio", side_effect=_fake_download)
+    def test_cookies_flag_passes_file_to_downloader(
+        self, mock_dl: MagicMock, mock_tx: MagicMock, tmp_path: Path
+    ) -> None:
+        output_file = tmp_path / "out.txt"
+        cookies_file = tmp_path / "cookies.txt"
+        cookies_file.write_text("fake cookies")
+
+        result = runner.invoke(app, [
+            "https://www.instagram.com/reel/abc",
+            "--cookies", str(cookies_file),
+            "--output", str(output_file),
+        ])
+        assert result.exit_code == 0
+        mock_dl.assert_called_once()
+        call_kwargs = mock_dl.call_args
+        assert call_kwargs.kwargs.get("cookies_file") == cookies_file or str(cookies_file) in str(call_kwargs)
