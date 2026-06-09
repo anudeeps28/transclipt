@@ -48,10 +48,15 @@ def main(
     language: Annotated[Optional[str], typer.Option("--language", "-l", help="Force language (e.g. en, hi, es)")] = None,
     output: Annotated[Optional[Path], typer.Option("--output", "-o", help="Output file path (default: auto-named)")] = None,
     device: Annotated[str, typer.Option("--device", "-d", help="Device: auto, cpu, or cuda")] = "auto",
+    cookies: Annotated[Optional[Path], typer.Option("--cookies", help="Path to cookies.txt file for authenticated downloads")] = None,
 ) -> None:
     """Transcribe video/audio URLs to text."""
     if output and len(urls) > 1:
         console.print("[red]Error:[/red] --output can only be used with a single URL.")
+        raise typer.Exit(code=1)
+
+    if cookies and not cookies.is_file():
+        console.print(f"[red]Error:[/red] Cookies file not found: {cookies}")
         raise typer.Exit(code=1)
 
     for url in urls:
@@ -62,6 +67,7 @@ def main(
             language=language,
             output_path=output,
             device=device,
+            cookies_file=cookies,
         )
 
 
@@ -72,6 +78,7 @@ def _process_url(
     language: str | None,
     output_path: Path | None,
     device: str,
+    cookies_file: Path | None = None,
 ) -> None:
     tmp_dir = Path(tempfile.mkdtemp(prefix="transclipt_"))
 
@@ -82,7 +89,7 @@ def _process_url(
             console=console,
         ) as progress:
             task = progress.add_task("Downloading audio...", total=None)
-            dl_result = download_audio(url, output_dir=tmp_dir)
+            dl_result = download_audio(url, output_dir=tmp_dir, cookies_file=cookies_file)
 
             progress.update(task, description=f"Transcribing with {model_size} model...")
             tx_result = transcribe(

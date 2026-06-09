@@ -62,6 +62,7 @@ transclipt <url> --format json --output result.json
 | `--language` | `-l` | Force language (e.g. `en`, `hi`, `es`) | auto-detect |
 | `--output` | `-o` | Output file path | auto-named from video title |
 | `--device` | `-d` | Device: `auto`, `cpu`, `cuda` | `auto` |
+| `--cookies` | | Path to a cookies.txt file (see [Advanced](#advanced)) | — |
 
 ### Model tradeoff
 
@@ -74,6 +75,14 @@ transclipt <url> --format json --output result.json
 | `large-v3` | Slowest | Best accuracy | ~1.5 GB |
 
 First run of each model downloads the weights. Cached after that.
+
+## Sites that require login
+
+Some sites (Instagram, TikTok, Twitter/X) require you to be logged in to access content. transclipt handles this automatically — it reads cookies from your browser so you don't need to do anything extra. Just make sure you're logged into the site in Chrome, Firefox, or another browser on your machine.
+
+On macOS, you may see a system prompt asking to allow access to your browser's cookie storage. Click "Allow" — this is a one-time permission that lets transclipt use your existing login session.
+
+If automatic browser cookies don't work, see the [Advanced](#advanced) section below.
 
 ## Supported sites
 
@@ -90,6 +99,16 @@ First run of each model downloads the weights. Cached after that.
 - Linux
 
 Windows is untested but should work — ffmpeg and all Python dependencies have Windows builds.
+
+## Advanced
+
+If automatic browser cookie detection doesn't work (e.g. in a Docker container, CI, or headless server), you can provide a cookies file manually:
+
+```bash
+transclipt https://www.instagram.com/reel/... --cookies ~/cookies.txt
+```
+
+To export a cookies file: install a browser extension like "Get cookies.txt LOCALLY" for Chrome, navigate to the site you need, and export. The file follows the Netscape cookie format that yt-dlp expects.
 
 ## License
 
