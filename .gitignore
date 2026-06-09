@@ -61,3 +61,7 @@ appsettings.Development.json
 *.mp3
 *.m4a
 *.wav
+
+# Transcription output (keep folder, ignore contents)
+output/*
+!output/.gitkeep
