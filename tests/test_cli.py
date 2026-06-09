@@ -129,6 +129,23 @@ class TestCli:
         ])
         assert result.exit_code == 0
 
+    @patch("transclipt.cli.transcribe", side_effect=lambda **kw: _fake_transcribe(**kw))
+    @patch("transclipt.cli.download_audio", side_effect=_fake_download)
+    def test_auto_named_output_goes_to_output_dir(self, mock_dl: MagicMock, mock_tx: MagicMock, tmp_path: Path) -> None:
+        project_root = Path(__file__).resolve().parent.parent
+        output_dir = project_root / "output"
+        existing = set(output_dir.glob("*.txt")) if output_dir.exists() else set()
+
+        result = runner.invoke(app, ["https://www.youtube.com/watch?v=abc"])
+        assert result.exit_code == 0
+        assert output_dir.is_dir()
+
+        new_files = set(output_dir.glob("*.txt")) - existing
+        assert len(new_files) == 1
+        new_file = new_files.pop()
+        assert "Hello world." in new_file.read_text()
+        new_file.unlink()
+
     @patch("transclipt.cli.download_audio", side_effect=RuntimeError("Network error"))
     def test_download_error_exits_with_code_1(self, mock_dl: MagicMock, tmp_path: Path) -> None:
         output_file = tmp_path / "out.txt"

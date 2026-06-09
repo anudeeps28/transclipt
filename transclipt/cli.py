@@ -98,10 +98,12 @@ def _process_url(
         if output_path:
             dest = output_path
         else:
+            output_dir = Path(__file__).resolve().parent.parent / "output"
+            output_dir.mkdir(exist_ok=True)
             safe_title = "".join(
                 c if c.isalnum() or c in " -_" else "_" for c in dl_result.title
             )
-            dest = Path(f"{safe_title}{get_extension(fmt)}")
+            dest = output_dir / f"{safe_title}{get_extension(fmt)}"
 
         dest.write_text(formatted, encoding="utf-8")
         console.print(f"[green]Done:[/green] {dest}")
