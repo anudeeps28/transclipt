@@ -18,6 +18,10 @@ dependencies = [
 
 [project.optional-dependencies]
 spotify = ["spotdl>=4.2.0"]
+capture = [
+    "patchright>=1.60.0",
+    "pyobjc-framework-Vision>=12.0; sys_platform == 'darwin'",
+]
 
 [project.scripts]
 transclipt = "transclipt.cli:app"
