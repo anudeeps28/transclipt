@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -14,6 +15,8 @@ from transclipt.capturer import (
     _extract_title,
     _is_login_wall,
 )
+
+_has_patchright = importlib.util.find_spec("patchright") is not None
 
 
 class TestCaptureFrameResult:
@@ -99,6 +102,7 @@ class TestLoginRequiredError:
         assert str(err) == "test message"
 
 
+@pytest.mark.skipif(not _has_patchright, reason="patchright not installed")
 class TestCaptureReel:
     @patch("patchright.sync_api.sync_playwright")
     def test_login_wall_raises_error(self, mock_pw: MagicMock, tmp_path: Path) -> None:
