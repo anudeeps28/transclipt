@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -13,7 +13,6 @@ from transclipt.capturer import (
     _ensure_session_dir,
     _extract_title,
     _is_login_wall,
-    _SESSION_DIR,
 )
 
 
@@ -101,7 +100,7 @@ class TestLoginRequiredError:
 
 
 class TestCaptureReel:
-    @patch("transclipt.capturer.sync_playwright")
+    @patch("patchright.sync_api.sync_playwright")
     def test_login_wall_raises_error(self, mock_pw: MagicMock, tmp_path: Path) -> None:
         mock_context = MagicMock()
         mock_page = MagicMock()
@@ -124,7 +123,7 @@ class TestCaptureReel:
             )
 
     @patch("transclipt.capturer.time")
-    @patch("transclipt.capturer.sync_playwright")
+    @patch("patchright.sync_api.sync_playwright")
     def test_captures_frames_successfully(self, mock_pw: MagicMock, mock_time: MagicMock, tmp_path: Path) -> None:
         mock_context = MagicMock()
         mock_page = MagicMock()

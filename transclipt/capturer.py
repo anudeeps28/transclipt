@@ -5,8 +5,10 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from patchright.sync_api import sync_playwright, Page, BrowserContext
+if TYPE_CHECKING:
+    from patchright.sync_api import Page, BrowserContext
 
 
 _SESSION_DIR = Path.home() / ".transclipt" / "browser"
@@ -138,6 +140,8 @@ def capture_reel(
     headed: bool = False,
     capture_audio: bool = True,
 ) -> CaptureFrameResult:
+    from patchright.sync_api import sync_playwright
+
     session_dir = _ensure_session_dir()
     frames_dir = output_dir / "frames"
 
@@ -203,6 +207,8 @@ def capture_reel(
 
 
 def login_interactive() -> None:
+    from patchright.sync_api import sync_playwright
+
     session_dir = _ensure_session_dir()
 
     with sync_playwright() as p:
