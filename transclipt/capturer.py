@@ -21,6 +21,7 @@ _INSTAGRAM_DOMAINS = frozenset({
 class CaptureFrameResult:
     frames_dir: Path
     frame_count: int
+    audio_path: Path | None
     title: str
     source_url: str
 
@@ -106,11 +107,36 @@ def _capture_frames(page: Page, frames_dir: Path, duration: float, fps: float = 
     return frame_count
 
 
+def _get_browser_pid(context: BrowserContext) -> int | None:
+    try:
+        browser = context.browser
+        if browser:
+            return browser.process.pid  # type: ignore[union-attr]
+    except Exception:
+        pass
+    return None
+
+
+def _start_audio_capture(output_dir: Path, duration: float, pid: int | None) -> Path | None:
+    try:
+        from transclipt.audio_capture import capture_audio, is_available
+    except ImportError:
+        return None
+
+    if not is_available():
+        return None
+
+    audio_path = output_dir / "audio.wav"
+    success = capture_audio(audio_path, duration, pid)
+    return audio_path if success else None
+
+
 def capture_reel(
     url: str,
     output_dir: Path,
     fps: float = 1.0,
     headed: bool = False,
+    capture_audio: bool = True,
 ) -> CaptureFrameResult:
     session_dir = _ensure_session_dir()
     frames_dir = output_dir / "frames"
@@ -147,11 +173,28 @@ def capture_reel(
             _play_video(page)
             time.sleep(0.5)
 
+            audio_path = None
+            if capture_audio:
+                browser_pid = _get_browser_pid(context)
+                import threading
+                audio_result: list[Path | None] = [None]
+
+                def _audio_thread() -> None:
+                    audio_result[0] = _start_audio_capture(output_dir, duration + 1, browser_pid)
+
+                audio_thread = threading.Thread(target=_audio_thread)
+                audio_thread.start()
+
             frame_count = _capture_frames(page, frames_dir, duration, fps)
+
+            if capture_audio:
+                audio_thread.join(timeout=duration + 35)  # type: ignore[possibly-undefined]
+                audio_path = audio_result[0]  # type: ignore[possibly-undefined]
 
             return CaptureFrameResult(
                 frames_dir=frames_dir,
                 frame_count=frame_count,
+                audio_path=audio_path,
                 title=title,
                 source_url=url,
             )

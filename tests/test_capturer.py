@@ -22,6 +22,7 @@ class TestCaptureFrameResult:
         result = CaptureFrameResult(
             frames_dir=tmp_path,
             frame_count=10,
+            audio_path=None,
             title="Test Reel",
             source_url="https://www.instagram.com/reel/abc",
         )
@@ -29,14 +30,17 @@ class TestCaptureFrameResult:
             result.title = "changed"  # type: ignore[misc]
 
     def test_fields(self, tmp_path: Path) -> None:
+        audio_file = tmp_path / "audio.wav"
         result = CaptureFrameResult(
             frames_dir=tmp_path,
             frame_count=5,
+            audio_path=audio_file,
             title="My Reel",
             source_url="https://www.instagram.com/reel/xyz",
         )
         assert result.frames_dir == tmp_path
         assert result.frame_count == 5
+        assert result.audio_path == audio_file
         assert result.title == "My Reel"
         assert result.source_url == "https://www.instagram.com/reel/xyz"
 

@@ -263,10 +263,20 @@ def _process_capture(
                 provider=ocr_provider,
             )
 
+            tx_result = None
+            if capture_result.audio_path and capture_result.audio_path.exists():
+                progress.update(task, description=f"Transcribing audio with {model_size} model...")
+                tx_result = transcribe(
+                    audio_path=capture_result.audio_path,
+                    model_size=model_size,
+                    language=language,
+                    device=device,
+                )
+
             progress.update(task, description="Formatting output...")
             merged = merge_results(
                 ocr_texts=ocr_texts,
-                transcription=None,
+                transcription=tx_result,
                 title=capture_result.title,
                 source_url=url,
             )
@@ -285,6 +295,8 @@ def _process_capture(
         dest.write_text(formatted, encoding="utf-8")
         console.print(f"[green]Done:[/green] {dest}")
         console.print(f"  OCR blocks: {len(ocr_texts)}")
+        if tx_result:
+            console.print(f"  Audio language: {tx_result.language} ({tx_result.language_probability:.0%})")
         console.print(f"  Frames captured: {capture_result.frame_count}")
 
     except typer.Exit:
