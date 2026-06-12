@@ -16,6 +16,8 @@ from transclipt.downloader import download_audio
 from transclipt.formatter import format_output, get_extension
 from transclipt.transcriber import transcribe
 
+_SUPPORTED_EXTENSIONS: frozenset[str] = frozenset({".mp4", ".mp3", ".wav", ".m4a", ".webm"})
+
 app = typer.Typer(
     name="transclipt",
     help="Transcribe any video URL to text. Supports YouTube, Instagram, TikTok, Twitter, Spotify, and 1000+ more.",
@@ -60,15 +62,94 @@ def main(
         raise typer.Exit(code=1)
 
     for url in urls:
-        _process_url(
-            url=url,
-            fmt=format.value,
-            model_size=model.value,
-            language=language,
-            output_path=output,
-            device=device,
-            cookies_file=cookies,
+        if _is_local_file(url):
+            _process_local_file(
+                file_path_str=url,
+                fmt=format.value,
+                model_size=model.value,
+                language=language,
+                output_path=output,
+                device=device,
+            )
+        else:
+            _process_url(
+                url=url,
+                fmt=format.value,
+                model_size=model.value,
+                language=language,
+                output_path=output,
+                device=device,
+                cookies_file=cookies,
+            )
+
+
+def _is_local_file(input_str: str) -> bool:
+    path = Path(input_str)
+    return path.exists() and path.suffix != ""
+
+
+def _process_local_file(
+    file_path_str: str,
+    fmt: str,
+    model_size: str,
+    language: str | None,
+    output_path: Path | None,
+    device: str,
+) -> None:
+    file_path = Path(file_path_str).resolve()
+
+    if not file_path.is_file():
+        console.print(f"[red]Error:[/red] File not found: {file_path_str}")
+        raise typer.Exit(code=1)
+
+    if file_path.suffix.lower() not in _SUPPORTED_EXTENSIONS:
+        console.print(
+            f"[red]Error:[/red] Unsupported file format: {file_path.suffix}. "
+            f"Supported: {', '.join(sorted(_SUPPORTED_EXTENSIONS))}"
         )
+        raise typer.Exit(code=1)
+
+    title = file_path.stem
+
+    try:
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+        ) as progress:
+            task = progress.add_task(
+                f"Transcribing {file_path.name} with {model_size} model...", total=None
+            )
+            tx_result = transcribe(
+                audio_path=file_path,
+                model_size=model_size,
+                language=language,
+                device=device,
+            )
+
+            progress.update(task, description="Formatting output...")
+            formatted = format_output(tx_result, fmt)
+
+        if output_path:
+            dest = output_path
+        else:
+            output_dir = Path(__file__).resolve().parent.parent / "output"
+            output_dir.mkdir(exist_ok=True)
+            safe_title = "".join(
+                c if c.isalnum() or c in " -_" else "_" for c in title
+            )
+            dest = output_dir / f"{safe_title}{get_extension(fmt)}"
+
+        dest.write_text(formatted, encoding="utf-8")
+        console.print(f"[green]Done:[/green] {dest}")
+        console.print(f"  Language: {tx_result.language} ({tx_result.language_probability:.0%})")
+        console.print(f"  Segments: {len(tx_result.segments)}")
+
+    except typer.Exit:
+        raise
+    except Exception as err:
+        console.print(f"[red]Error processing {file_path_str}:[/red] {err}")
+        raise typer.Exit(code=1)
 
 
 def _process_url(

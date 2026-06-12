@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
 from typer.testing import CliRunner
 
 from transclipt.cli import app
@@ -181,3 +182,89 @@ class TestCli:
         mock_dl.assert_called_once()
         call_kwargs = mock_dl.call_args
         assert call_kwargs.kwargs.get("cookies_file") == cookies_file or str(cookies_file) in str(call_kwargs)
+
+
+class TestLocalFile:
+    @patch("transclipt.cli.transcribe", side_effect=lambda **kw: _fake_transcribe(**kw))
+    @patch("transclipt.cli.download_audio", side_effect=_fake_download)
+    def test_local_file_mp4_transcribes_directly(
+        self, mock_dl: MagicMock, mock_tx: MagicMock, tmp_path: Path
+    ) -> None:
+        audio_file = tmp_path / "recording.mp4"
+        audio_file.write_bytes(b"fake audio")
+        output_file = tmp_path / "out.txt"
+
+        result = runner.invoke(app, [str(audio_file), "--output", str(output_file)])
+
+        assert result.exit_code == 0
+        assert "Done:" in result.output
+        assert output_file.exists()
+        assert "Hello world." in output_file.read_text()
+        mock_dl.assert_not_called()
+
+    @patch("transclipt.cli.transcribe", side_effect=lambda **kw: _fake_transcribe(**kw))
+    def test_local_file_title_from_stem(self, mock_tx: MagicMock, tmp_path: Path) -> None:
+        audio_file = tmp_path / "my_podcast.mp3"
+        audio_file.write_bytes(b"fake audio")
+
+        project_root = Path(__file__).resolve().parent.parent
+        output_dir = project_root / "output"
+        existing = set(output_dir.glob("*my_podcast*")) if output_dir.exists() else set()
+
+        result = runner.invoke(app, [str(audio_file)])
+
+        assert result.exit_code == 0
+        new_files = set(output_dir.glob("*my_podcast*")) - existing
+        assert len(new_files) == 1
+        new_files.pop().unlink()
+
+    def test_local_file_not_found_treated_as_url(self, tmp_path: Path) -> None:
+        result = runner.invoke(app, [str(tmp_path / "missing.mp4")])
+        assert result.exit_code == 1
+        assert "Error processing" in result.output
+
+    def test_local_file_unsupported_extension(self, tmp_path: Path) -> None:
+        data_file = tmp_path / "data.xyz"
+        data_file.write_bytes(b"fake data")
+
+        result = runner.invoke(app, [str(data_file)])
+
+        assert result.exit_code == 1
+        assert "Unsupported file format: .xyz" in result.output
+
+    @pytest.mark.parametrize("ext", [".mp4", ".mp3", ".wav", ".m4a", ".webm"])
+    @patch("transclipt.cli.transcribe", side_effect=lambda **kw: _fake_transcribe(**kw))
+    def test_local_file_all_supported_extensions(
+        self, mock_tx: MagicMock, ext: str, tmp_path: Path
+    ) -> None:
+        audio_file = tmp_path / f"test_audio{ext}"
+        audio_file.write_bytes(b"fake audio")
+        output_file = tmp_path / "out.txt"
+
+        result = runner.invoke(app, [str(audio_file), "--output", str(output_file)])
+
+        assert result.exit_code == 0
+        assert output_file.exists()
+
+    @patch("transclipt.cli.transcribe", side_effect=lambda **kw: _fake_transcribe(**kw))
+    @patch("transclipt.cli.download_audio", side_effect=_fake_download)
+    def test_url_still_uses_download(self, mock_dl: MagicMock, mock_tx: MagicMock, tmp_path: Path) -> None:
+        output_file = tmp_path / "out.txt"
+        result = runner.invoke(app, [
+            "https://www.youtube.com/watch?v=abc",
+            "--output", str(output_file),
+        ])
+        assert result.exit_code == 0
+        mock_dl.assert_called_once()
+
+    @patch("transclipt.cli.transcribe", side_effect=lambda **kw: _fake_transcribe(**kw))
+    def test_local_file_with_output_flag(self, mock_tx: MagicMock, tmp_path: Path) -> None:
+        audio_file = tmp_path / "talk.mp4"
+        audio_file.write_bytes(b"fake audio")
+        output_file = tmp_path / "custom_output.txt"
+
+        result = runner.invoke(app, [str(audio_file), "--output", str(output_file)])
+
+        assert result.exit_code == 0
+        assert output_file.exists()
+        assert "Hello world." in output_file.read_text()
