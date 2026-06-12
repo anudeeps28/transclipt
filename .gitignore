@@ -54,6 +54,7 @@ htmlcov/
 # Secrets
 .env
 *.env.local
+cookies.txt
 local.settings.json
 appsettings.Development.json
 
@@ -61,6 +62,9 @@ appsettings.Development.json
 *.mp3
 *.m4a
 *.wav
+
+# Swift compiled binary
+transclipt/audio_capture/audio_capture
 
 # Transcription output (keep folder, ignore contents)
 output/*

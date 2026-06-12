@@ -18,6 +18,29 @@ dependencies = [
 
 [project.optional-dependencies]
 spotify = ["spotdl>=4.2.0"]
+capture = [
+    "patchright>=1.60.0",
+    "pyobjc-framework-Vision>=12.0; sys_platform == 'darwin'",
+]
 
 [project.scripts]
 transclipt = "transclipt.cli:app"
+
+[tool.coverage.run]
+omit = [
+    "transclipt/capturer.py",
+    "transclipt/ocr.py",
+    "transclipt/merger.py",
+    "transclipt/audio_capture/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "from transclipt.capturer import",
+    "from transclipt.ocr import",
+    "from transclipt.merger import",
+    "def _process_capture",
+    "def capture_to_",
+    "def _is_capture_result",
+]
